@@ -37,9 +37,13 @@ else()
   set(BOOST_REQUIRED_VERSION 1.67)
 endif()
 
-find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED system filesystem program_options iostreams regex)
+# Yuko: The official repo is not compatible with Windows environment, 
+#       Let me hardcode something to make it compatible with Windows
+#find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED system filesystem program_options iostreams regex)
 
 # Find if Boost was compiled in C++03 mode because it requires -DBOOST_NO_CXX11_SCOPED_ENUMS
+include_directories(${BOOST_ROOT})
+link_directories(${BOOST_LIBRARY_PATH})
 
 set(CMAKE_REQUIRED_INCLUDES ${Boost_INCLUDE_DIR})
 set(CMAKE_REQUIRED_LIBRARIES ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_IOSTREAMS_LIBRARY})
