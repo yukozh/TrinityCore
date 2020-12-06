@@ -36,6 +36,7 @@
 #include "GossipDef.h"
 #include "Group.h"
 #include "GuildMgr.h"
+#include "Item.h"
 #include "Language.h"
 #include "Log.h"
 #include "MapManager.h"
@@ -110,6 +111,7 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
 
     Creature* unit = nullptr;
     GameObject* go = nullptr;
+    Item* item = nullptr;
     if (guid.IsCreatureOrVehicle())
     {
         unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_GOSSIP);
@@ -128,6 +130,15 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
             return;
         }
     }
+    else if (guid.IsItem())
+    {
+        item = _player->GetItemByGuid(guid);
+        if (!item) 
+        {
+            TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - %s not found(Item).", guid.ToString().c_str());
+            return;
+        }
+    }
     else
     {
         TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - unsupported %s.", guid.ToString().c_str());
@@ -138,7 +149,8 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
 
-    if ((unit && unit->GetScriptId() != unit->LastUsedScriptID) || (go && go->GetScriptId() != go->LastUsedScriptID))
+    if (!item && ((unit && unit->GetScriptId() != unit->LastUsedScriptID) 
+        || (go && go->GetScriptId() != go->LastUsedScriptID)))
     {
         TC_LOG_DEBUG("network", "WORLD: HandleGossipSelectOptionOpcode - Script reloaded while in use, ignoring and set new scipt id");
         if (unit)
@@ -155,9 +167,14 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
             if (!unit->AI()->OnGossipSelectCode(_player, menuId, gossipListId, code.c_str()))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
-        else
+        else if (go)
         {
             if (!go->AI()->OnGossipSelectCode(_player, menuId, gossipListId, code.c_str()))
+                _player->OnGossipSelect(go, gossipListId, menuId);
+        }
+        else if (item)
+        {
+            if (!sScriptMgr->OnGossipSelect(_player, item, gossipListId, menuId))
                 _player->OnGossipSelect(go, gossipListId, menuId);
         }
     }
@@ -168,9 +185,14 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recvData)
             if (!unit->AI()->OnGossipSelect(_player, menuId, gossipListId))
                 _player->OnGossipSelect(unit, gossipListId, menuId);
         }
-        else
+        else if(go)
         {
             if (!go->AI()->OnGossipSelect(_player, menuId, gossipListId))
+                _player->OnGossipSelect(go, gossipListId, menuId);
+        }
+        else if (item)
+        {
+            if (!sScriptMgr->OnGossipSelect(_player, item, gossipListId, menuId))
                 _player->OnGossipSelect(go, gossipListId, menuId);
         }
     }

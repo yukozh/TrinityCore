@@ -2172,6 +2172,20 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
 
         std::string GetDebugInfo() const override;
 
+        /*********************************************************/
+        /***                  YUKO EXTENDED                    ***/
+        /*********************************************************/
+        bool IsAlliance() const 
+        { 
+            uint8 race = GetRace();
+            return race == 1 || race == 3 || race == 4 || race == 7 || race == 11;
+        }
+
+        bool IsHorde() const 
+        {
+            return !IsAlliance();
+        }
+
     protected:
         // Gamemaster whisper whitelist
         GuidList WhisperList;

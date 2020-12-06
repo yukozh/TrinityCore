@@ -20,6 +20,10 @@
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
+
+void AddSC_item_teleport_stone();
+
 void AddCustomScripts()
 {
+    AddSC_item_teleport_stone();
 }

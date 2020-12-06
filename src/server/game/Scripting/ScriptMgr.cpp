@@ -1574,6 +1574,15 @@ bool ScriptMgr::OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo co
     return tmpscript->OnCastItemCombatSpell(player, victim, spellInfo, item);
 }
 
+bool ScriptMgr::OnGossipSelect(Player* player, Item* item, uint32 gossipListId, uint32 menuId)
+{
+    ASSERT(player);
+    ASSERT(item);
+
+    GET_SCRIPT_RET(ItemScript, item->GetScriptId(), tmpscript, true);
+    return tmpscript->OnGossipSelect(player, item, gossipListId, menuId);
+}
+
 CreatureAI* ScriptMgr::GetCreatureAI(Creature* creature)
 {
     ASSERT(creature);

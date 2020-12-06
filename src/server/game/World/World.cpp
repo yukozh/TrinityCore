@@ -89,6 +89,9 @@
 #include "WhoListStorage.h"
 #include "WorldSession.h"
 
+// Yuko Extended
+#include "MenuMgr.h"
+
 #include <boost/asio/ip/address.hpp>
 
 TC_GAME_API std::atomic<bool> World::m_stopEvent(false);
@@ -2084,6 +2087,9 @@ void World::SetInitialWorldSettings()
     ///- Initialize game time and timers
     TC_LOG_INFO("server.loading", "Initialize game time and timers");
     GameTime::UpdateGameTimers();
+
+    TC_LOG_INFO("server.loading", "Initialize menu templates...");
+    sMenuMgr.LoadFromDB();
 
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES(%u, %u, 0, '%s')",
                             realm.Id.Realm, uint32(GameTime::GetStartTime()), GitRevision::GetFullVersion());       // One-time query
