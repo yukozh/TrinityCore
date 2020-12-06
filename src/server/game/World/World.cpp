@@ -26,6 +26,7 @@
 #include "ArenaTeamMgr.h"
 #include "AuctionHouseBot.h"
 #include "AuctionHouseMgr.h"
+#include "AutoBroadcastMgr.h"
 #include "BattlefieldMgr.h"
 #include "BattlegroundMgr.h"
 #include "CalendarMgr.h"
@@ -2091,6 +2092,9 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Initialize menu templates...");
     sMenuMgr.LoadFromDB();
 
+    TC_LOG_INFO("server.loading", "Initialize auto broadcast messages...");
+    sAutoBroadcastMgr.LoadFromDB();
+
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES(%u, %u, 0, '%s')",
                             realm.Id.Realm, uint32(GameTime::GetStartTime()), GitRevision::GetFullVersion());       // One-time query
 
@@ -2115,6 +2119,8 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_WHO_LIST].SetInterval(5 * IN_MILLISECONDS); // update who list cache every 5 seconds
 
     m_timers[WUPDATE_CHANNEL_SAVE].SetInterval(getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_INTERVAL) * MINUTE * IN_MILLISECONDS);
+
+    m_timers[WUPDATE_AUTO_BROADCAST].SetInterval(1 * MINUTE * IN_MILLISECONDS); // Yuko: Auto broadcast
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -2532,6 +2538,14 @@ void World::Update(uint32 diff)
         TC_METRIC_TIMER("world_update_time", TC_METRIC_TAG("type", "Update instance reset times"));
         // update the instance reset times
         sInstanceSaveMgr->Update();
+    }
+
+    // Yuko: Auto broadcast
+    if (m_timers[WUPDATE_AUTO_BROADCAST].Passed())
+    {
+        TC_METRIC_TIMER("world_update_time", TC_METRIC_TAG("type", "Auto broadcast"));
+        m_timers[WUPDATE_AUTO_BROADCAST].Reset();
+        sAutoBroadcastMgr.SendBroadcast();
     }
 
     // Check for shutdown warning
