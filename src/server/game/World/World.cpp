@@ -26,7 +26,6 @@
 #include "ArenaTeamMgr.h"
 #include "AuctionHouseBot.h"
 #include "AuctionHouseMgr.h"
-#include "AutoBroadcastMgr.h"
 #include "BattlefieldMgr.h"
 #include "BattlegroundMgr.h"
 #include "CalendarMgr.h"
@@ -91,7 +90,9 @@
 #include "WorldSession.h"
 
 // Yuko Extended
-#include "MenuMgr.h"
+#include "AutoBroadcastMgr.h" // Auto broadcast manager
+#include "DbConfigMgr.h" // DB-based configurations manager
+#include "MenuMgr.h" // Menu Manager
 
 #include <boost/asio/ip/address.hpp>
 
@@ -2089,11 +2090,18 @@ void World::SetInitialWorldSettings()
     TC_LOG_INFO("server.loading", "Initialize game time and timers");
     GameTime::UpdateGameTimers();
 
+    // Yuko Extended Begin
+
+    TC_LOG_INFO("server.loading", "Initialize DB-based configurations...");
+    sDbConfigMgr.LoadFromDB();
+
     TC_LOG_INFO("server.loading", "Initialize menu templates...");
     sMenuMgr.LoadFromDB();
 
     TC_LOG_INFO("server.loading", "Initialize auto broadcast messages...");
     sAutoBroadcastMgr.LoadFromDB();
+
+    // Yuko Extended End
 
     LoginDatabase.PExecute("INSERT INTO uptime (realmid, starttime, uptime, revision) VALUES(%u, %u, 0, '%s')",
                             realm.Id.Realm, uint32(GameTime::GetStartTime()), GitRevision::GetFullVersion());       // One-time query
@@ -2120,7 +2128,15 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_CHANNEL_SAVE].SetInterval(getIntConfig(CONFIG_PRESERVE_CUSTOM_CHANNEL_INTERVAL) * MINUTE * IN_MILLISECONDS);
 
-    m_timers[WUPDATE_AUTO_BROADCAST].SetInterval(1 * MINUTE * IN_MILLISECONDS); // Yuko: Auto broadcast
+    // Yuko: Auto broadcast timer
+    if (sDbConfigMgr.Exists("AutoBroadcast.Interval"))
+    {
+        uint32 interval = sDbConfigMgr.GetUInt32("AutoBroadcast.Interval");
+        if (interval)
+        {
+            m_timers[WUPDATE_AUTO_BROADCAST].SetInterval(interval * IN_MILLISECONDS);
+        }
+    }
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
