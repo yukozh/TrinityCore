@@ -39,6 +39,7 @@
 #include "ConditionMgr.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "DbConfigMgr.h"
 #include "DisableMgr.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
@@ -5039,6 +5040,15 @@ void Player::RepopAtGraveyard()
 
 bool Player::CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone) const
 {
+    // Yuko: Replace trade channel with world channel
+    if (sDbConfigMgr.GetBool("WorldChannel.ReplaceTradeChannelSwitch"))
+    {
+        if (channel->Flags & CHANNEL_DBC_FLAG_TRADE)
+        {
+            return true;
+        }
+    }
+
     if (channel->Flags & CHANNEL_DBC_FLAG_ZONE_DEP && zone->Flags & AREA_FLAG_ARENA_INSTANCE)
         return false;
 
@@ -5114,7 +5124,18 @@ void Player::UpdateLocalChannels(uint32 newZone)
         {
             if (!(channelEntry->Flags & CHANNEL_DBC_FLAG_GLOBAL))
             {
-                if (channelEntry->Flags & CHANNEL_DBC_FLAG_CITY_ONLY && usedChannel)
+                // Yuko: If the server enabled replace trade channel with world channel switch,
+                // The trade channel should not be city channel anymore.
+                bool needSkip = true;
+                if (sDbConfigMgr.GetBool("WorldChannel.ReplaceTradeChannelSwitch"))
+                {
+                    if (channelEntry->Flags & CHANNEL_DBC_FLAG_TRADE)
+                    {
+                        needSkip = false;
+                    }
+                }
+
+                if (needSkip && channelEntry->Flags & CHANNEL_DBC_FLAG_CITY_ONLY && channelEntry->Flags & CHANNEL_DBC_FLAG_CITY_ONLY && usedChannel)
                     continue;                            // Already on the channel, as city channel names are not changing
 
                 joinChannel = cMgr->GetSystemChannel(channelEntry->ID, current_zone);

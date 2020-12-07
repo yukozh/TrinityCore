@@ -18,6 +18,7 @@
 #include "ChannelMgr.h"
 #include "Channel.h"
 #include "DatabaseEnv.h"
+#include "DbConfigMgr.h"
 #include "DBCStores.h"
 #include "Log.h"
 #include "Player.h"
@@ -156,6 +157,16 @@ Channel* ChannelMgr::GetSystemChannel(uint32 channelId, AreaTableEntry const* zo
     uint32 zoneId = zoneEntry ? zoneEntry->ID : 0;
     if (channelEntry->Flags & (CHANNEL_DBC_FLAG_GLOBAL | CHANNEL_DBC_FLAG_CITY_ONLY))
         zoneId = 0;
+
+    // Yuko: If the server enabled replace trade channel with world channel switch,
+    // We will enforce the channel to be singleton, no need to change location.
+    if (sDbConfigMgr.GetBool("WorldChannel.ReplaceTradeChannelSwitch"))
+    {
+        if (channelEntry->Flags & CHANNEL_DBC_FLAG_TRADE)
+        {
+            zoneId = 0;
+        }
+    }
 
     std::pair<uint32, uint32> key = std::make_pair(channelId, zoneId);
 

@@ -20,6 +20,7 @@
 #include "ChannelAppenders.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
+#include "DbConfigMgr.h"
 #include "DBCStores.h"
 #include "GameTime.h"
 #include "GridNotifiers.h"
@@ -90,6 +91,17 @@ void Channel::GetChannelName(std::string& channelName, uint32 channelId, LocaleC
     if (channelId)
     {
         ChatChannelsEntry const* channelEntry = sChatChannelsStore.AssertEntry(channelId);
+
+        // Yuko: If the server enabled replace trade channel with world channel switch,
+        // We will get the world channel name and force send the name to client.
+        if (sDbConfigMgr.GetBool("WorldChannel.ReplaceTradeChannelSwitch"))
+        {
+            if (channelEntry->Flags & CHANNEL_DBC_FLAG_TRADE)
+            {
+                channelName = sObjectMgr->GetTrinityString(LANG_WORLD_CHANNEL)->Content.at(0);
+            }
+        }
+
         if (!(channelEntry->Flags & CHANNEL_DBC_FLAG_GLOBAL))
         {
             if (channelEntry->Flags & CHANNEL_DBC_FLAG_CITY_ONLY)
@@ -104,6 +116,17 @@ void Channel::GetChannelName(std::string& channelName, uint32 channelId, LocaleC
 
 std::string Channel::GetName(LocaleConstant locale /*= DEFAULT_LOCALE*/) const
 {
+    // Yuko: If the server enabled replace trade channel with world channel switch,
+    // We will get the world channel name and force send the name to client.
+
+    if (sDbConfigMgr.GetBool("WorldChannel.ReplaceTradeChannelSwitch"))
+    {
+        if (GetFlags() & CHANNEL_FLAG_TRADE)
+        {
+            return sObjectMgr->GetTrinityString(LANG_WORLD_CHANNEL)->Content.at(0);
+        }
+    }
+
     std::string result = _channelName;
     Channel::GetChannelName(result, _channelId, locale, _zoneEntry);
 
