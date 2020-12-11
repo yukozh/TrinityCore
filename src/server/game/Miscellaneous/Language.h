@@ -1216,6 +1216,7 @@ enum TrinityStrings
     LANG_SHUTDOWN_CANCELLED                       = 11018,
 
     // Yuko: Extended
-    LANG_WORLD_CHANNEL                            = 80000
+    LANG_WORLD_CHANNEL                            = 80000,
+    LANG_CURRENCY_BALANCE                         = 80001
 };
 #endif

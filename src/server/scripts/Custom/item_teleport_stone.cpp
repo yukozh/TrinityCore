@@ -1,9 +1,13 @@
+#include "CustomizedCurrencyMgr.h"
 #include "GossipDef.h"
 #include "Item.h"
+#include "Language.h"
 #include "MenuMgr.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "World.h"
 #include "WorldSession.h"
 
 class item_teleport_stone : public ItemScript
@@ -35,6 +39,18 @@ public:
                 player->TeleportTo(menuItem->teleportMapId, menuItem->teleportX, menuItem->teleportY, menuItem->teleportZ, player->GetOrientation(), 0);
                 player->PlayerTalkClass->SendCloseGossip();
                 break;
+            case MENU_FUNCTION_GET_CURRENCY_BALANCES: {
+                auto definitions = sCustomizedCurrencyMgr.GetDefinitions();
+                for (const auto def : definitions)
+                {
+                    sCustomizedCurrencyMgr.GetBalance(player->GetSession()->GetAccountId(), def.id, std::function<void(int32)>([player, def](int32 balance) {
+                        // Yuko: Will the player already be disposed here?
+                        sWorld->SendServerMessage(SERVER_MSG_STRING, Trinity::StringFormat(sObjectMgr->GetTrinityString(LANG_CURRENCY_BALANCE)->Content.at(0), def.name.c_str(), balance), player);
+                    }));
+                }
+                player->PlayerTalkClass->SendCloseGossip();
+                break;
+            }
             default:
                 return true;
             }
@@ -56,7 +72,7 @@ private:
         if (player->IsInCombat())
         {
             //player->GetSession()->SendNotification(LANG_TELE_CANNOT_USE_WHEN_ATTACK);
-            //player->PlayerTalkClass->SendCloseGossip();
+            player->PlayerTalkClass->SendCloseGossip();
             return true;
         }
         return false;

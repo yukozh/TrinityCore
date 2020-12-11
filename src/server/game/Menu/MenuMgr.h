@@ -17,8 +17,9 @@ enum MenuFaction
 
 enum MenuFunction 
 {
-    MENU_FUNCTION_SHOW_SUBMENU  = 0,
-    MENU_FUNCTION_TELEPORT      = 1
+    MENU_FUNCTION_SHOW_SUBMENU          = 0,
+    MENU_FUNCTION_TELEPORT              = 1,
+    MENU_FUNCTION_GET_CURRENCY_BALANCES = 2
 };
 
 struct TeleportStoneMenuItem 

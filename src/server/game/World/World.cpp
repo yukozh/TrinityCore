@@ -91,6 +91,7 @@
 
 // Yuko Extended
 #include "AutoBroadcastMgr.h" // Auto broadcast manager
+#include "CustomizedCurrencyMgr.h"
 #include "DbConfigMgr.h" // DB-based configurations manager
 #include "MenuMgr.h" // Menu Manager
 
@@ -2100,6 +2101,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Initialize auto broadcast messages...");
     sAutoBroadcastMgr.LoadFromDB();
+
+    TC_LOG_INFO("server.loading", "Initialize customized currencies...");
+    sCustomizedCurrencyMgr.LoadFromDB();
 
     // Yuko Extended End
 
