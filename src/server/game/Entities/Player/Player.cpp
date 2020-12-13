@@ -38,6 +38,7 @@
 #include "Common.h"
 #include "ConditionMgr.h"
 #include "CreatureAI.h"
+#include "CustomizedCurrencyMgr.h"
 #include "DatabaseEnv.h"
 #include "DbConfigMgr.h"
 #include "DisableMgr.h"
@@ -69,6 +70,7 @@
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "OnlineRewardMgr.h"
 #include "Opcodes.h"
 #include "OutdoorPvP.h"
 #include "OutdoorPvPMgr.h"
@@ -1047,6 +1049,9 @@ void Player::Update(uint32 p_time)
     CheckDuelDistance(now);
 
     UpdateAfkReport(now);
+
+    // Yuko: Online Rewards
+    UpdateOnlineRewards(p_time);
 
     Unit::AIUpdateTick(p_time);
 
@@ -26984,4 +26989,39 @@ std::string Player::GetDebugInfo() const
     std::stringstream sstr;
     sstr << Unit::GetDebugInfo();
     return sstr.str();
+}
+
+// Yuko: Online Rewards
+void Player::UpdateOnlineRewards(uint32 time) {
+    for (auto i = rewardTimers.begin(); i != rewardTimers.end(); ++i) {
+        rewardTimers[i->first] += time;
+    }
+    for (const auto& rule : sOnlineRewardMgr.GetRules()) {
+        if (rewardTimers[rule.id] / 1000 >= rule.interval) {
+            rewardTimers[rule.id] = 0;
+            switch (rule.type) {
+            case ONLINE_REWARD_TYPE_MONEY:
+                this->ModifyMoney(rule.amount);
+                break;
+            case ONLINE_REWARD_TYPE_CUSTOMIZED_CURRENCY:
+                sCustomizedCurrencyMgr.SetBalance(this->GetSession()->GetAccountId(), rule.rewardId, rule.amount, [currencyId = rule.rewardId, rewardAmount = rule.amount, player = this](bool result) {
+                    auto definitions = sCustomizedCurrencyMgr.GetDefinitions();
+                    auto def = std::find_if(definitions.begin(), definitions.end(), [currencyId](auto item) {
+                        return item.id == currencyId;
+                    });
+                    sWorld->SendServerMessage(SERVER_MSG_STRING, Trinity::StringFormat(sObjectMgr->GetTrinityString(LANG_CURRENCY_GAIN)->Content.at(0), def->name.c_str(), rewardAmount), player);
+                });
+                break;
+            case ONLINE_REWARD_TYPE_ITEM:
+                ItemPosCountVec dest;
+                InventoryResult msg = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, rule.rewardId, rule.amount);
+                if (msg == EQUIP_ERR_OK)
+                {
+                    Item* item = StoreNewItem(dest, rule.rewardId, true);
+                    SendNewItem(item, rule.amount, true, false);
+                }
+                break;
+            }
+        }
+    }
 }

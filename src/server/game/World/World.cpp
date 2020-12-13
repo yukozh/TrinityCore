@@ -94,6 +94,7 @@
 #include "CustomizedCurrencyMgr.h"
 #include "DbConfigMgr.h" // DB-based configurations manager
 #include "MenuMgr.h" // Menu Manager
+#include "OnlineRewardMgr.h" // Online Reward
 
 #include <boost/asio/ip/address.hpp>
 
@@ -2104,6 +2105,9 @@ void World::SetInitialWorldSettings()
 
     TC_LOG_INFO("server.loading", "Initialize customized currencies...");
     sCustomizedCurrencyMgr.LoadFromDB();
+
+    TC_LOG_INFO("server.loading", "Initialize online rewards...");
+    sOnlineRewardMgr.LoadFromDB();
 
     // Yuko Extended End
 

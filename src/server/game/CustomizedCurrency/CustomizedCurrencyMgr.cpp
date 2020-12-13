@@ -105,6 +105,10 @@ void CustomizedCurrencyMgr::SetBalance(uint32 accountId, uint32 currencyId, int3
         LoginDatabase.PExecute("update pomelo_customized_currency_balance set amount = %d where accountId = %u and currencyId = %u", balance, accountId, currencyId);
         callback(true);
     });
+
+    workMutex.lock();
+    workQueue.push(job);
+    workMutex.unlock();
 }
 
 CustomizedCurrencyMgr sCustomizedCurrencyMgr;

@@ -31,6 +31,7 @@
 #include "QuestDef.h"
 #include <memory>
 #include <queue>
+#include <unordered_map>
 #include <unordered_set>
 
 struct AccessRequirement;
@@ -2514,6 +2515,10 @@ class TC_GAME_API Player : public Unit, public GridObject<Player>
         uint32 manaBeforeDuel;
 
         WorldLocation _corpseLocation;
+
+        // Yuko: Online Rewards
+        std::unordered_map<uint32, uint32> rewardTimers;
+        void UpdateOnlineRewards(uint32 time);
 };
 
 TC_GAME_API void AddItemsSetItem(Player* player, Item* item);

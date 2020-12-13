@@ -1217,6 +1217,7 @@ enum TrinityStrings
 
     // Yuko: Extended
     LANG_WORLD_CHANNEL                            = 80000,
-    LANG_CURRENCY_BALANCE                         = 80001
+    LANG_CURRENCY_BALANCE                         = 80001,
+    LANG_CURRENCY_GAIN                            = 80002
 };
 #endif
