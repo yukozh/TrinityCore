@@ -22,8 +22,10 @@
 // void Add${NameOfDirectory}Scripts()
 
 void AddSC_item_teleport_stone();
+void AddSC_player_auto_training();
 
 void AddCustomScripts()
 {
     AddSC_item_teleport_stone();
+    AddSC_player_auto_training();
 }
