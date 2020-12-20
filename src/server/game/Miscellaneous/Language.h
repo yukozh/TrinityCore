@@ -1218,6 +1218,8 @@ enum TrinityStrings
     // Yuko: Extended
     LANG_WORLD_CHANNEL                            = 80000,
     LANG_CURRENCY_BALANCE                         = 80001,
-    LANG_CURRENCY_GAIN                            = 80002
+    LANG_CURRENCY_GAIN                            = 80002,
+    LANG_MUST_IN_TEAM_OR_GROUP                    = 80003,
+    LANG_CANNOT_USE_WHEN_ATTACK                   = 80004
 };
 #endif
