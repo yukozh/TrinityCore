@@ -40,13 +40,13 @@ public:
                 if (!i->enforce && player->GetLevel() < i->requiredLevel) {
                     continue;
                 }
-                player->LearnSpell(i->spellId, !i->enforce);
+                player->LearnSpell(i->spellId, false);
             }
             for (auto i = spells[CommonClassId].begin(); i != spells[CommonClassId].end(); ++i) {
                 if (!i->enforce && player->GetLevel() < i->requiredLevel) {
                     continue;
                 }
-                player->LearnSpell(i->spellId, !i->enforce);
+                player->LearnSpell(i->spellId, false);
             }
         }
 

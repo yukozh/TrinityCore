@@ -71,7 +71,7 @@ private:
     {
         if (player->IsInCombat())
         {
-            //player->GetSession()->SendNotification(LANG_TELE_CANNOT_USE_WHEN_ATTACK);
+            player->GetSession()->SendNotification(LANG_CANNOT_USE_WHEN_ATTACK);
             player->PlayerTalkClass->SendCloseGossip();
             return true;
         }
